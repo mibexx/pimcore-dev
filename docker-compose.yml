@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  database:
+    image: mariadb:10.5
+    container_name: database
+    env_file: .env
+    volumes:
+      - type: volume
+        source: database-vol
+        target: /var/lib/mysql
+    networks:
+      pimcore: {}
+  cache:
+    image: redis:6.2-alpine
+    container_name: cache
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - type: volume
+        source: cache-vol
+        target: /data
+    networks:
+      pimcore: {}
+  php:
+    image: mibexx/pimcore-dev-php:7.4
+    env_file: .env
+    container_name: php
+    volumes:
+      - type: volume
+        source: pimcore-vol
+        target: /var/www
+        volume:
+          nocopy: true
+  app:
+    build: .
+    env_file: .env
+    container_name: pimcore-app
+    ports:
+      - "0.0.0.0:80:80"
+    volumes:
+      - type: volume
+        source: pimcore-vol
+        target: /var/www
+        volume:
+          nocopy: true
+
+volumes:
+  database-vol:
+  cache-vol:
+  pimcore-vol:
+    external: true
+
+networks:
+  pimcore:
+    name: pimcore-net
