@@ -15,6 +15,10 @@ ENV PHP_FPM_START_SERVERS="2"
 ENV PHP_FPM_MIN_SPARE_SERVERS="1"
 ENV PHP_FPM_MAX_SPARE_SERVERS="2"
 
+# App
+ENV APP_DIR "/var/www"
+ENV DOCROOT "/var/www/web"
+
 RUN apk add --no-cache $PHPIZE_DEPS libxml2-dev libpng libpng-dev oniguruma oniguruma-dev \
                        libzip libzip-dev icu icu-dev libcurl curl-dev graphviz graphviz-dev \
                        imagemagick-dev libtool
@@ -43,4 +47,8 @@ RUN pecl install -o -f imagick-3.4.4 \
 
 ADD conf/opcache.ini "$PHP_INI_DIR/conf.d/opcache.ini"
 COPY conf/www.conf /usr/local/etc/php-fpm.d/www.conf
-COPY conf/index.php /var/www/web/index.php
+
+
+COPY conf/index.php $DOCROOT/index.php
+
+RUN chown -R www-data:www-data $APP_DIR
